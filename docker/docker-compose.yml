@@ -1,86 +1,37 @@
-name: bytebot
+version: "3.8" # Utilise la version 3.8 de Docker Compose
 
 services:
-  bytebot-desktop:
-    # Build from source
-    build:
-      context: ../packages/
-      dockerfile: bytebotd/Dockerfile
-    # Use pre-built image
-    image: ghcr.io/bytebot-ai/bytebot-desktop:edge
-    shm_size: "2g"
-    container_name: bytebot-desktop
-    restart: unless-stopped
-    hostname: computer
-    privileged: true
-    ports:
-      - "9990:9990" # bytebotd service & noVNC
-    environment:
-      - DISPLAY=:0
-    networks:
-      - bytebot-network
-
-  postgres:
-    image: postgres:16-alpine
-    container_name: bytebot-postgres
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=bytebotdb
-    networks:
-      - bytebot-network
+  # Service principal pour le script de scraping (notre "Scanner")
+  blue_scanner:
+    build: . # Docker va chercher un Dockerfile dans le répertoire actuel
+    container_name: alexandria_blue_scanner
+    restart: on-failure # Redémarre le conteneur s'il échoue
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  bytebot-agent:
-    build:
-      context: ../packages/
-      dockerfile: bytebot-agent/Dockerfile
-    # Use pre-built image
-    image: ghcr.io/bytebot-ai/bytebot-agent:edge
-    container_name: bytebot-agent
-    restart: unless-stopped
-    ports:
-      - "9991:9991"
+      - .:/app # Monte le répertoire actuel (où se trouve le Dockerfile et tes scripts Python) dans /app du conteneur
+      - ./data:/app/data # Crée un volume persistant pour stocker les données scrappées
     environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/bytebotdb}
-      - BYTEBOT_DESKTOP_BASE_URL=${BYTEBOT_DESKTOP_BASE_URL:-http://bytebot-desktop:9990}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-    depends_on:
-      - postgres
-    networks:
-      - bytebot-network
+      # Ici, tu pourrais ajouter des variables d'environnement si nécessaire
+      # Par exemple, des clés d'API, des identifiants (NE PAS mettre d'infos sensibles ici directement)
+      # - AMAZON_REGION=ca
+      # - MIN_PROFIT_THRESHOLD=50
+      TZ: "America/Montreal" # Définit le fuseau horaire du conteneur
+    # Si tu as besoin d'exécuter une commande spécifique au démarrage du scanner
+    # command: python /app/scanner.py
 
-  bytebot-ui:
-    build:
-      context: ../packages/
-      dockerfile: bytebot-ui/Dockerfile
-      args:
-        - BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL:-http://bytebot-agent:9991}
-        - BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL:-http://bytebot-desktop:9990/websockify}
-    # Use pre-built image
-    image: ghcr.io/bytebot-ai/bytebot-ui:edge
-    container_name: bytebot-ui
-    restart: unless-stopped
-    ports:
-      - "9992:9992"
-    environment:
-      - NODE_ENV=production
-      - BYTEBOT_AGENT_BASE_URL=${BYTEBOT_AGENT_BASE_URL:-http://bytebot-agent:9991}
-      - BYTEBOT_DESKTOP_VNC_URL=${BYTEBOT_DESKTOP_VNC_URL:-http://bytebot-desktop:9990/websockify}
-    depends_on:
-      - bytebot-agent
-    networks:
-      - bytebot-network
+  # Un service optionnel pour une base de données locale (ex: SQLite pour les données)
+  # Ce service est commenté pour l'instant, mais prêt à être activé si besoin.
+  # db:
+  #   image: postgres:13-alpine # Exemple avec PostgreSQL léger
+  #   container_name: alexandria_blue_db
+  #   restart: always
+  #   environment:
+  #     POSTGRES_DB: alexandria_db
+  #     POSTGRES_USER: alexandria_user
+  #     POSTGRES_PASSWORD: your_strong_password_here # CHANGE THIS
+  #   volumes:
+  #     - blue_db_data:/var/lib/postgresql/data # Volume persistant pour la base de données
 
-networks:
-  bytebot-network:
-    driver: bridge
-
+# Volumes nommés pour la persistance des données
 volumes:
-  postgres_data:
+  blue_db_data: # Pour la base de données (si activé)
+  # Tu peux ajouter d'autres volumes si tu as des besoins spécifiques de persistance

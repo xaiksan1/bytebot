@@ -1,0 +1,5 @@
+# Ce sont les "outils" Python essentiels dont j'ai besoin pour mon Scanner.
+requests             # Pour faire des requêtes HTTP à Amazon
+beautifulsoup4       # Pour analyser le HTML des pages d'Amazon
+lxml                 # Un parser HTML/XML rapide pour BeautifulSoup
+pandas               # Pour manipuler et organiser les données scrappées
