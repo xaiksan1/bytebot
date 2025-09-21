@@ -1,8 +1,6 @@
-<div align="center">
+# Bytebot: Open-Source AI Desktop Agent
 
 <img src="docs/images/bytebot-logo.png" width="500" alt="Bytebot Logo">
-
-# Bytebot: Open-Source AI Desktop Agent
 
 <a href="https://trendshift.io/repositories/14624" target="_blank"><img src="https://trendshift.io/api/badge/repositories/14624" alt="bytebot-ai%2Fbytebot | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 
@@ -26,8 +24,7 @@
 [Русский](https://zdoc.app/ru/bytebot-ai/bytebot) | 
 [中文](https://zdoc.app/zh/bytebot-ai/bytebot)
 </div>
-
----
+[中文](https://zdoc.app/zh/bytebot-ai/bytebot)
 
 https://github.com/user-attachments/assets/f271282a-27a3-43f3-9b99-b34007fdd169
 
@@ -308,3 +305,4 @@ Bytebot is open source under the Apache 2.0 license.
 <sub>Built by [Tantl Labs](https://tantl.com) and the open source community</sub>
 
 </div>
+<sub>Built by [Tantl Labs](https://tantl.com) and the open source community</sub>
