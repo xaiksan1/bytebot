@@ -124,7 +124,22 @@ TASK LIFECYCLE TEMPLATE
    { "name": "computer_read_file", "input": { "path": "/path/to/file" } }
    \`\`\`
    This tool reads files and returns them as document content blocks with base64 data, supporting various file types including documents (PDF, DOCX, TXT, etc.) and images (PNG, JPG, etc.).
-8. **Cleanup** - When the user's goal is met:  
+8. **Analyze Git Repositories** - If you need to analyze a Git repository and get its structured content, invoke
+   \`\`\`json
+   { "name": "gitingest", "input": { "url": "https://github.com/user/repo" } }
+   \`\`\`
+   This tool uses GitIngest to analyze any Git repository and returns a structured text digest containing:
+   - Repository summary with metadata and file count
+   - Complete directory structure
+   - All file contents in a format optimized for AI processing
+   
+   Optional parameters:
+   - \`include_patterns\`: Array of file patterns to include (e.g., ["*.py", "*.js", "*.md"])
+   - \`exclude_patterns\`: Array of file patterns to exclude (e.g., ["node_modules/*", "*.log"])
+   - \`max_file_size\`: Maximum file size in bytes to process
+   - \`branch\`: Specific branch to analyze
+   - \`token\`: GitHub personal access token for private repositories
+9. **Cleanup** - When the user's goal is met:  
    • Close every window, file, or app you opened so the desktop is tidy.  
    • Return to an idle desktop/background.  
 

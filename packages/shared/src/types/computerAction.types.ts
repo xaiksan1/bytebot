@@ -105,6 +105,16 @@ export type ReadFileAction = {
   path: string;
 };
 
+export type GitIngestAction = {
+  action: "gitingest";
+  url: string;
+  include_patterns?: string[];
+  exclude_patterns?: string[];
+  max_file_size?: number;
+  branch?: string;
+  token?: string;
+};
+
 // Define the union type using the individual action types
 export type ComputerAction =
   | MoveMouseAction
@@ -122,4 +132,5 @@ export type ComputerAction =
   | CursorPositionAction
   | ApplicationAction
   | WriteFileAction
-  | ReadFileAction;
+  | ReadFileAction
+  | GitIngestAction;

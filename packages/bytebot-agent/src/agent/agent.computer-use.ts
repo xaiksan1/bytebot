@@ -20,6 +20,7 @@ import {
   isApplicationToolUseBlock,
   isPasteTextToolUseBlock,
   isReadFileToolUseBlock,
+  isGitIngestToolUseBlock,
 } from '@bytebot/shared';
 import { Logger } from '@nestjs/common';
 
@@ -174,6 +175,53 @@ export async function handleComputerToolUse(
             {
               type: MessageContentType.Text,
               text: result.message || 'Error reading file',
+            },
+          ],
+          is_error: true,
+        };
+      }
+    }
+
+    if (isGitIngestToolUseBlock(block)) {
+      logger.debug(`Running gitingest on repository: ${block.input.url}`);
+      try {
+        const result = await gitingest(block.input);
+
+        if (result.success && result.data) {
+          // Return text content block with the GitIngest output
+          return {
+            type: MessageContentType.ToolResult,
+            tool_use_id: block.id,
+            content: [
+              {
+                type: MessageContentType.Text,
+                text: result.data,
+              },
+            ],
+          };
+        } else {
+          // Return error message
+          return {
+            type: MessageContentType.ToolResult,
+            tool_use_id: block.id,
+            content: [
+              {
+                type: MessageContentType.Text,
+                text: result.message || 'Error running gitingest',
+              },
+            ],
+            is_error: true,
+          };
+        }
+      } catch (error) {
+        logger.error('Error in gitingest operation:', error);
+        return {
+          type: MessageContentType.ToolResult,
+          tool_use_id: block.id,
+          content: [
+            {
+              type: MessageContentType.Text,
+              text: `Error running gitingest: ${error.message}`,
             },
           ],
           is_error: true,
@@ -605,6 +653,45 @@ async function readFile(input: { path: string }): Promise<{
     return {
       success: false,
       message: `Error reading file: ${error.message}`,
+    };
+  }
+}
+
+async function gitingest(input: {
+  url: string;
+  include_patterns?: string[];
+  exclude_patterns?: string[];
+  max_file_size?: number;
+  branch?: string;
+  token?: string;
+}): Promise<{
+  success: boolean;
+  data?: string;
+  message?: string;
+}> {
+  console.log(`Running gitingest on repository: ${input.url}`);
+
+  try {
+    const response = await fetch(`${BYTEBOT_DESKTOP_BASE_URL}/computer-use`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'gitingest',
+        ...input,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to run gitingest: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error in gitingest action:', error);
+    return {
+      success: false,
+      message: `Error running gitingest: ${error.message}`,
     };
   }
 }

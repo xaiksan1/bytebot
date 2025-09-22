@@ -382,6 +382,52 @@ export const _readFileTool = {
 };
 
 /**
+ * Tool definition for gitingest - analyzing Git repositories
+ */
+export const _gitingestTool = {
+  name: 'gitingest',
+  description:
+    'Analyzes a Git repository and generates a structured text digest containing repository summary, directory structure, and file contents for AI processing',
+  input_schema: {
+    type: 'object' as const,
+    properties: {
+      url: {
+        type: 'string' as const,
+        description: 'The Git repository URL (GitHub, GitLab, etc.)',
+      },
+      include_patterns: {
+        type: 'array' as const,
+        items: { type: 'string' as const },
+        description: 'Array of file patterns to include (e.g., ["*.py", "*.js", "*.md"])',
+        nullable: true,
+      },
+      exclude_patterns: {
+        type: 'array' as const,
+        items: { type: 'string' as const },
+        description: 'Array of file patterns to exclude (e.g., ["node_modules/*", "*.log"])',
+        nullable: true,
+      },
+      max_file_size: {
+        type: 'number' as const,
+        description: 'Maximum file size in bytes to process (default: no limit)',
+        nullable: true,
+      },
+      branch: {
+        type: 'string' as const,
+        description: 'Specific branch to analyze (defaults to repository default branch)',
+        nullable: true,
+      },
+      token: {
+        type: 'string' as const,
+        description: 'GitHub personal access token for private repositories',
+        nullable: true,
+      },
+    },
+    required: ['url'],
+  },
+};
+
+/**
  * Export all tools as an array
  */
 export const agentTools = [
@@ -402,4 +448,5 @@ export const agentTools = [
   _setTaskStatusTool,
   _createTaskTool,
   _readFileTool,
+  _gitingestTool,
 ];

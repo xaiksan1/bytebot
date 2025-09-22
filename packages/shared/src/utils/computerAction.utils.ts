@@ -16,6 +16,7 @@ import {
   PasteTextAction,
   WriteFileAction,
   ReadFileAction,
+  GitIngestAction,
 } from "../types/computerAction.types";
 import {
   ComputerToolUseContentBlock,
@@ -293,6 +294,20 @@ export function convertReadFileActionToToolUseBlock(
   });
 }
 
+export function convertGitIngestActionToToolUseBlock(
+  action: GitIngestAction,
+  toolUseId: string
+): ComputerToolUseContentBlock {
+  return createToolUseBlock("gitingest", toolUseId, {
+    url: action.url,
+    include_patterns: action.include_patterns,
+    exclude_patterns: action.exclude_patterns,
+    max_file_size: action.max_file_size,
+    branch: action.branch,
+    token: action.token,
+  });
+}
+
 /**
  * Generic converter that handles all action types
  */
@@ -333,6 +348,8 @@ export function convertComputerActionToToolUseBlock(
       return convertWriteFileActionToToolUseBlock(action, toolUseId);
     case "read_file":
       return convertReadFileActionToToolUseBlock(action, toolUseId);
+    case "gitingest":
+      return convertGitIngestActionToToolUseBlock(action, toolUseId);
     default:
       const exhaustiveCheck: never = action;
       throw new Error(

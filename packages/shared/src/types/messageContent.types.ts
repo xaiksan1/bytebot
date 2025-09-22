@@ -184,6 +184,18 @@ export type ReadFileToolUseBlock = ToolUseContentBlock & {
   };
 };
 
+export type GitIngestToolUseBlock = ToolUseContentBlock & {
+  name: "gitingest";
+  input: {
+    url: string;
+    include_patterns?: string[];
+    exclude_patterns?: string[];
+    max_file_size?: number;
+    branch?: string;
+    token?: string;
+  };
+};
+
 export type ComputerToolUseContentBlock =
   | MoveMouseToolUseBlock
   | TraceMouseToolUseBlock
@@ -200,7 +212,8 @@ export type ComputerToolUseContentBlock =
   | CursorPositionToolUseBlock
   | ApplicationToolUseBlock
   | WriteFileToolUseBlock
-  | ReadFileToolUseBlock;
+  | ReadFileToolUseBlock
+  | GitIngestToolUseBlock;
 
 export type UserActionContentBlock = MessageContentBlockBase & {
   type: MessageContentType.UserAction;

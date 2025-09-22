@@ -20,6 +20,7 @@ import {
   PasteTextAction,
   WriteFileAction,
   ReadFileAction,
+  GitIngestAction,
 } from '@bytebot/shared';
 
 @Injectable()
@@ -95,6 +96,10 @@ export class ComputerUseService {
 
       case 'read_file': {
         return this.readFile(params);
+      }
+
+      case 'gitingest': {
+        return this.gitingest(params);
       }
 
       default:
@@ -501,6 +506,94 @@ export class ComputerUseService {
       return {
         success: false,
         message: `Error reading file: ${error.message}`,
+      };
+    }
+  }
+
+  private async gitingest(action: GitIngestAction): Promise<{
+    success: boolean;
+    data?: string;
+    message?: string;
+  }> {
+    try {
+      const execAsync = promisify(exec);
+
+      // Prepare gitingest command
+      let gitingestCmd = `python3 -c "
+from gitingest import ingest
+import json
+import sys
+
+try:
+    # Prepare arguments
+    url = '${action.url.replace(/'/g, "\\'")}'
+    kwargs = {}
+    
+    if '${action.include_patterns || ''}':
+        kwargs['include_patterns'] = ${JSON.stringify(action.include_patterns || [])}
+    
+    if '${action.exclude_patterns || ''}':
+        kwargs['exclude_patterns'] = ${JSON.stringify(action.exclude_patterns || [])}
+    
+    if ${action.max_file_size || 'None'}:
+        kwargs['max_file_size'] = ${action.max_file_size}
+    
+    if '${action.branch || ''}':
+        kwargs['branch'] = '${action.branch}'
+    
+    if '${action.token || ''}':
+        kwargs['token'] = '${action.token}'
+    
+    # Run gitingest
+    summary, tree, content = ingest(url, **kwargs)
+    
+    # Combine all parts into the expected format
+    full_result = f'{summary}\\n\\n{tree}\\n\\n{content}'
+    
+    # Return success result
+    result = {
+        'success': True,
+        'data': full_result
+    }
+    print(json.dumps(result))
+    
+except Exception as e:
+    # Return error result
+    result = {
+        'success': False,
+        'message': f'GitIngest error: {str(e)}'
+    }
+    print(json.dumps(result))
+    sys.exit(1)
+"`;
+
+      this.logger.log(`Running gitingest for repository: ${action.url}`);
+      
+      const { stdout, stderr } = await execAsync(gitingestCmd, {
+        timeout: 300000, // 5 minutes timeout
+      });
+
+      if (stderr) {
+        this.logger.warn(`GitIngest stderr: ${stderr}`);
+      }
+
+      try {
+        const result = JSON.parse(stdout);
+        this.logger.log(`GitIngest completed successfully for: ${action.url}`);
+        return result;
+      } catch (parseError) {
+        this.logger.error(`Error parsing GitIngest output: ${parseError.message}`);
+        return {
+          success: false,
+          message: `Error parsing GitIngest output: ${parseError.message}`,
+        };
+      }
+
+    } catch (error) {
+      this.logger.error(`Error running GitIngest: ${error.message}`, error.stack);
+      return {
+        success: false,
+        message: `Error running GitIngest: ${error.message}`,
       };
     }
   }

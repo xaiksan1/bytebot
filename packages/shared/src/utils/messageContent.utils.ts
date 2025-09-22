@@ -27,6 +27,7 @@ import {
   PasteTextToolUseBlock,
   WriteFileToolUseBlock,
   ReadFileToolUseBlock,
+  GitIngestToolUseBlock,
   UserActionContentBlock,
 } from "../types/messageContent.types";
 
@@ -512,4 +513,15 @@ export function isReadFileToolUseBlock(
 
   const block = obj as Record<string, any>;
   return block.name === "computer_read_file";
+}
+
+export function isGitIngestToolUseBlock(
+  obj: unknown
+): obj is GitIngestToolUseBlock {
+  if (!isComputerToolUseContentBlock(obj)) {
+    return false;
+  }
+
+  const block = obj as Record<string, any>;
+  return block.name === "gitingest";
 }
