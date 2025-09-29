@@ -18,7 +18,7 @@ jobs:
 
     steps:
       # 1. Check out code
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.3.0
 
       # 2. Enable QEMU so the amd64 runner can cross‑build arm64
       - uses: docker/setup-qemu-action@v3
