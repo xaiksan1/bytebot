@@ -10,7 +10,7 @@
     "build": "tsc -p tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "bun run build"
   },
   "exports": {
     ".": {
